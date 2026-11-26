@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>نموذج أمر إيقاف عمل (STOP WORK ORDER) - وحدة أعمال الباحة</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #0f4c5c;
+      --primary-dark: #09323d;
+      --danger: #b91c1c;
+      --danger-light: #fef2f2;
+      --bg: #f1f5f9;
+      --card: #ffffff;
+      --border: #cbd5e1;
+      --text: #1e293b;
+      --muted: #64748b;
+    }
+
+    * {
+      box-sizing: border-box;
+      font-family: 'Cairo', sans-serif;
+    }
+
+    body {
+      margin: 0;
+      padding: 16px;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      background: var(--card);
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      overflow: hidden;
+      border-top: 8px solid var(--danger);
+    }
+
+    .header {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      color: #fff;
+      padding: 20px 24px;
+      text-align: center;
+      border-bottom: 4px solid #dc2626;
+    }
+
+    .header h1 {
+      margin: 0 0 6px;
+      font-size: 1.5rem;
+      font-weight: 800;
+    }
+
+    .header p {
+      margin: 0;
+      font-size: 0.95rem;
+      opacity: 0.95;
+    }
+
+    .badge-stop {
+      display: inline-block;
+      background: #dc2626;
+      color: #fff;
+      padding: 4px 14px;
+      border-radius: 999px;
+      font-weight: 700;
+      font-size: 0.85rem;
+      margin-bottom: 8px;
+      letter-spacing: 0.5px;
+    }
+
+    .form-body {
+      padding: 24px;
+    }
+
+    .section {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 18px;
+      margin-bottom: 20px;
+      background: #fff;
+    }
+
+    .section-title {
+      margin: -18px -18px 16px -18px;
+      padding: 10px 18px;
+      background: #f8fafc;
+      border-bottom: 1px solid var(--border);
+      border-radius: 10px 10px 0 0;
+      font-weight: 700;
+      color: var(--primary);
+      font-size: 1.05rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 14px;
+    }
+
+    .form-group {
+      margin-bottom: 12px;
+    }
+
+    label {
+      display: block;
+      font-weight: 700;
+      font-size: 0.9rem;
+      margin-bottom: 5px;
+      color: var(--text);
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="date"],
+    input[type="time"],
+    select,
+    textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      font-size: 0.95rem;
+      color: var(--text);
+      background: #fff;
+      transition: border-color 0.2s;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+
+    input[readonly] {
+      background-color: #f8fafc;
+      color: #334155;
+      font-weight: 600;
+    }
+
+    .clauses-list {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+      background: var(--danger-light);
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid #fecaca;
+    }
+
+    .clause-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 0.9rem;
+      cursor: pointer;
+    }
+
+    .clause-item input[type="checkbox"] {
+      margin-top: 5px;
+      width: 17px;
+      height: 17px;
+      accent-color: var(--danger);
+    }
+
+    .signature-wrapper {
+      border: 2px dashed #94a3b8;
+      border-radius: 8px;
+      background: #fafafa;
+      text-align: center;
+      padding: 8px;
+    }
+
+    canvas#signaturePad {
+      width: 100%;
+      height: 150px;
+      background: #fff;
+      border-radius: 6px;
+      cursor: crosshair;
+      touch-action: none;
+      border: 1px solid #e2e8f0;
+    }
+
+    .sig-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      margin-top: 8px;
+    }
+
+    .photos-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 14px;
+      margin-top: 12px;
+    }
+
+    .photo-card {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px;
+      background: #f8fafc;
+      text-align: center;
+    }
+
+    .photo-card img {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+      border-radius: 6px;
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    .actions-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      margin-top: 10px;
+    }
+
+    .btn {
+      border: none;
+      border-radius: 8px;
+      padding: 11px 18px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: opacity 0.2s, transform 0.1s;
+    }
+
+    .btn:active {
+      transform: scale(0.98);
+    }
+
+    .btn-pdf { background: #dc2626; color: #fff; }
+    .btn-word { background: #1d4ed8; color: #fff; }
+    .btn-email { background: #0f4c5c; color: #fff; }
+    .btn-wa { background: #15803d; color: #fff; }
+    .btn-reset { background: #475569; color: #fff; }
+    .btn-sm { padding: 6px 12px; font-size: 0.85rem; }
+
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #0f172a;
+      color: #fff;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      display: none;
+      z-index: 1000;
+    }
+
+    @media print {
+      body { background: #fff; padding: 0; }
+      .container { box-shadow: none; border-radius: 0; max-width: 100%; }
+      .no-print { display: none !important; }
+      .page-break { page-break-before: always; break-before: page; }
+      .section { break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container" id="swoDocument">
+  <div class="header">
+    <div class="badge-stop">STOP WORK ORDER • أمر إيقاف عمل فوري</div>
+    <h1>نموذج أمر إيقاف عمل (STOP WORK ORDER)</h1>
+    <p>شركة مجموعة العمرو للاستشارات الهندسية – وحدة أعمال الباحة (القطاع الجنوبي)</p>
+  </div>
+
+  <div class="form-body">
+    <!-- 1. بيانات المشروع والمقاول ومراقب السلامة -->
+    <div class="section">
+      <div class="section-title">1. بيانات المشروع والمقاول ومراقب السلامة</div>
+
+      <div class="grid-2">
+        <div class="form-group no-print">
+          <label for="inspectorFilter">تصفية حسب مهندس / مراقب السلامة:</label>
+          <select id="inspectorFilter" onchange="filterProjects()">
+            <option value="all">-- جميع المشاريع (21 مشروعاً) --</option>
+            <optgroup label="مهندسو السلامة">
+              <option value="m_othman">م. عثمان عبدالمنعم (نطاق تهامة)</option>
+              <option value="m_suraqa">م. سراقة بانقا (نطاق السراة)</option>
+            </optgroup>
+            <optgroup label="مراقبو السلامة - نطاق تهامة">
+              <option value="mohammed">محمد حامد (ناوان / الأحسبة / يبس)</option>
+              <option value="fares">فارس الزهراني (قلوة / الحجرة / نيرا)</option>
+              <option value="mahjoub">محجوب محمد (المخواة)</option>
+              <option value="saad">سعد الزهراني (المخواة)</option>
+            </optgroup>
+            <optgroup label="مراقبو السلامة - نطاق السراة">
+              <option value="abdulaziz">عبدالعزيز الزهراني (المندق / القرى)</option>
+              <option value="abbas">عباس مصطفى (العقيق / إيصال)</option>
+              <option value="abdullah">عبدالله شكاك (بلجرشي / التوصيلات)</option>
+            </optgroup>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="projectSelect">اختر المشروع / المقاول:</label>
+          <select id="projectSelect" onchange="updateProjectDetails()"></select>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="form-group">
+          <label for="worksite">موقع العمل (Worksite):</label>
+          <input type="text" id="worksite" placeholder="أدخل اسم الحي / الشارع / المحافظة" />
+        </div>
+        <div class="form-group">
+          <label for="supervision">الإدارة المشرفة (Supervision):</label>
+          <input type="text" id="supervision" value="شركة مجموعة العمرو للاستشارات الهندسية" readonly />
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="form-group">
+          <label for="issuerName">مُصدر أمر الإيقاف (Name):</label>
+          <select id="issuerName">
+            <option value="محمد حامد">محمد حامد</option>
+            <option value="م. عثمان عبدالمنعم">م. عثمان عبدالمنعم</option>
+            <option value="م. سراقة بانقا">م. سراقة بانقا</option>
+            <option value="فارس الزهراني">فارس الزهراني</option>
+            <option value="محجوب محمد">محجوب محمد</option>
+            <option value="سعد الزهراني">سعد الزهراني</option>
+            <option value="عبدالعزيز الزهراني">عبدالعزيز الزهراني</option>
+            <option value="عباس مصطفى">عباس مصطفى</option>
+            <option value="عبدالله شكاك">عبدالله شكاك</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="issuerTitle">المسمى الوظيفي (Title):</label>
+          <input type="text" id="issuerTitle" value="مراقب أمن وسلامة" />
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="form-group">
+          <label for="swoDate">التاريخ (Date):</label>
+          <input type="date" id="swoDate" />
+        </div>
+        <div class="form-group">
+          <label for="swoTime">الوقت (Time):</label>
+          <input type="time" id="swoTime" />
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. وصف المشكلة وأسباب إيقاف العمل -->
+    <div class="section">
+      <div class="section-title">2. وصف المشكلة وأسباب إيقاف العمل</div>
+
+      <div class="form-group">
+        <label>بنود إيقاف العمل من اللائحة (اختر ما ينطبق):</label>
+        <div class="clauses-list">
+          <label class="clause-item">
+            <input type="checkbox" class="clause-cb" value="العمل داخل حفريات بعمق يزيد عن 1.5 متر دون توفير وسائل تدعيم (Shoring) أو ميول آمنة." />
+            <span>العمل داخل حفريات بعمق يزيد عن 1.5 متر دون توفير وسائل تدعيم (Shoring) أو ميول آمنة.</span>
+          </label>
+          <label class="clause-item">
+            <input type="checkbox" class="clause-cb" value="عدم تأمين منطقة العمل بالحواجز الخرسانية (New Jersey) واللوحات التحذيرية والإضاءة الليلية." />
+            <span>عدم تأمين منطقة العمل بالحواجز الخرسانية (New Jersey) واللوحات التحذيرية والإضاءة الليلية.</span>
+          </label>
+          <label class="clause-item">
+            <input type="checkbox" class="clause-cb" value="تشغيل معدات ثقيلة أو رافعات بدون رخص قيادة/تشغيل سارية أو بدون فحص دوري معتمد." />
+            <span>تشغيل معدات ثقيلة أو رافعات بدون رخص قيادة/تشغيل سارية أو بدون فحص دوري معتمد.</span>
+          </label>
+          <label class="clause-item">
+            <input type="checkbox" class="clause-cb" value="العمل بالقرب من خطوط الكهرباء أو الخدمات الحيوية دون تصريح عمل (PTW) أو عزل الطاقة." />
+            <span>العمل بالقرب من خطوط الكهرباء أو الخدمات الحيوية دون تصريح عمل (PTW) أو عزل الطاقة.</span>
+          </label>
+          <label class="clause-item">
+            <input type="checkbox" class="clause-cb" value="غياب مشرف السلامة المعتمد للمقاول أو عدم توفير معدات الوقاية الشخصية (PPE) الأساسية." />
+            <span>غياب مشرف السلامة المعتمد للمقاول أو عدم توفير معدات الوقاية الشخصية (PPE) الأساسية.</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="problemDesc">وصف المشكلة / ملاحظات إضافية لإيقاف العمل (كتابة يدوية):</label>
+        <textarea id="problemDesc" rows="3" placeholder="اكتب تفاصيل المخالفة المرصودة في الموقع بدقة..."></textarea>
+      </div>
+
+      <div class="form-group">
+        <label for="correctiveAction">الإجراء التصحيحي المطلوب (Corrective Action):</label>
+        <textarea id="correctiveAction" rows="2">إيقاف العمل فوراً وتطبيق نظام التدعيم والحماية اللازمة وفق مواصفات لائحة شركة المياه الوطنية قبل استئناف العمل.</textarea>
+      </div>
+
+      <div class="form-group">
+        <label for="executionTime">مدة التنفيذ (Time):</label>
+        <input type="text" id="executionTime" value="فوري / لحين المعالجة والاعتماد" />
+      </div>
+    </div>
+
+    <!-- 3. المسؤول عن الإجراء -->
+    <div class="section">
+      <div class="section-title">3. المسؤول عن الإجراء (Responsible Person)</div>
+      <div class="grid-2">
+        <div class="form-group">
+          <label for="respName">الاسم (Name):</label>
+          <input type="text" id="respName" placeholder="اسم مدير المشروع أو ممثل المقاول" />
+        </div>
+        <div class="form-group">
+          <label for="respTitle">المسمى الوظيفي (Title):</label>
+          <input type="text" id="respTitle" value="مدير المشروع / ممثل المقاول" />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="contractorEmail">إيميل إرسال أمر إيقاف العمل للمقاول / المسؤول:</label>
+        <input type="email" id="contractorEmail" placeholder="example@contractor.com" />
+      </div>
+
+      <div class="form-group">
+        <label>التوقيع (Sign):</label>
+        <div class="signature-wrapper">
+          <canvas id="signaturePad"></canvas>
+          <div class="sig-actions no-print">
+            <button type="button" class="btn btn-reset btn-sm" onclick="clearSignature()">🗑️ مسح التوقيع</button>
+            <button type="button" class="btn btn-email btn-sm" onclick="saveSignature()">💾 حفظ التوقيع</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. صور الموقع -->
+    <div class="section page-break">
+      <div class="section-title">4. صور الموقع (الصفحة التالية - حد أقصى صورتان لكل صفحة)</div>
+      <div class="no-print">
+        <input type="file" id="sitePhotosInput" accept="image/*" multiple onchange="handlePhotos(event)" />
+      </div>
+      <div class="photos-grid" id="photosPreview"></div>
+    </div>
+
+    <!-- 5. تصدير وإرسال أمر إيقاف العمل -->
+    <div class="section no-print">
+      <div class="section-title">5. تصدير وإرسال أمر إيقاف العمل</div>
+      <div class="actions-bar">
+        <button type="button" class="btn btn-pdf" onclick="window.print()">📄 تصدير PDF</button>
+        <button type="button" class="btn btn-word" onclick="exportToWord()">📘 تصدير Word (.docx)</button>
+        <button type="button" class="btn btn-email" onclick="sendEmail()">✉️ إرسال عبر الإيميل</button>
+        <button type="button" class="btn btn-wa" onclick="sendWhatsApp()">📲 إرسال إشعار واتساب</button>
+        <button type="button" class="btn btn-reset" onclick="resetForm()">🔄 نموذج جديد</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toastMsg">تم التنفيذ بنجاح ✓</div>
+
+<script>
+  const projectsData = [
+    { id: "141250115", name: "141250115 - شبكات المياه في المخواة وناوان والأحسبة (شركة خزام ناصر / منار الوطنية)", area: "تهامة", supervisor: "mohammed", engineer: "m_othman", email: "info.khuzam@example.com" },
+    { id: "141250116", name: "141250116 - استكمال شبكات المياه بمحافظة قلوة والحجرة", area: "تهامة", supervisor: "fares", engineer: "m_othman", email: "" },
+    { id: "141250117", name: "141250117 - شبكات المياه والخطوط الناقلة بالمخواة", area: "تهامة", supervisor: "mahjoub", engineer: "m_othman", email: "" },
+    { id: "141250118", name: "141250118 - التوصيلات المنزلية للمياه بالمخواة", area: "تهامة", supervisor: "saad", engineer: "m_othman", email: "" },
+    { id: "141250119", name: "141250119 - شبكات المياه بمحافظة المندق والقرى", area: "السراة", supervisor: "abdulaziz", engineer: "m_suraqa", email: "" },
+    { id: "141250120", name: "141250120 - مشاريع إيصال وشبكات المياه بالعقيق", area: "السراة", supervisor: "abbas", engineer: "m_suraqa", email: "" },
+    { id: "141250121", name: "141250121 - شبكات والتوصيلات المنزلية ببلجرشي", area: "السراة", supervisor: "abdullah", engineer: "m_suraqa", email: "" }
+  ];
+
+  let uploadedImages = [];
+
+  function showToast(msg) {
+    const t = document.getElementById("toastMsg");
+    t.textContent = msg;
+    t.style.display = "block";
+    setTimeout(() => { t.style.display = "none"; }, 2500);
+  }
+
+  function initDateTime() {
+    const now = new Date();
+    document.getElementById("swoDate").value = now.toISOString().split("T")[0];
+    document.getElementById("swoTime").value = now.toTimeString().slice(0, 5);
+  }
+
+  function filterProjects() {
+    const filter = document.getElementById("inspectorFilter").value;
+    const select = document.getElementById("projectSelect");
+    select.innerHTML = "";
+
+    const filtered = projectsData.filter(p => {
+      if (filter === "all") return true;
+      return p.supervisor === filter || p.engineer === filter;
+    });
+
+    filtered.forEach(p => {
+      const opt = document.createElement("option");
+      opt.value = p.id;
+      opt.textContent = p.name;
+      select.appendChild(opt);
+    });
+    updateProjectDetails();
+  }
+
+  function updateProjectDetails() {
+    const selectedId = document.getElementById("projectSelect").value;
+    const proj = projectsData.find(p => p.id === selectedId);
+    if (proj && proj.email) {
+      document.getElementById("contractorEmail").value = proj.email;
+    }
+  }
+
+  // Signature Pad
+  const canvas = document.getElementById("signaturePad");
+  const ctx = canvas.getContext("2d");
+  let drawing = false;
+
+  function resizeCanvas() {
+    const ratio = Math.max(window.devicePixelRatio || 1, 1);
+    canvas.width = canvas.offsetWidth * ratio;
+    canvas.height = canvas.offsetHeight * ratio;
+    ctx.scale(ratio, ratio);
+    ctx.lineWidth = 2;
+    ctx.lineCap = "round";
+    ctx.strokeStyle = "#0f172a";
+  }
+
+  function getPos(e) {
+    const rect = canvas.getBoundingClientRect();
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    return { x: clientX - rect.left, y: clientY - rect.top };
+  }
+
+  canvas.addEventListener("mousedown", e => { drawing = true; const p = getPos(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); });
+  canvas.addEventListener("mousemove", e => { if (!drawing) return; const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); });
+  canvas.addEventListener("mouseup", () => { drawing = false; });
+
+  canvas.addEventListener("touchstart", e => { e.preventDefault(); drawing = true; const p = getPos(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); }, { passive: false });
+  canvas.addEventListener("touchmove", e => { e.preventDefault(); if (!drawing) return; const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); }, { passive: false });
+  canvas.addEventListener("touchend", () => { drawing = false; });
+
+  function clearSignature() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    showToast("تم مسح التوقيع");
+  }
+
+  function saveSignature() {
+    showToast("تم حفظ التوقيع بنجاح ✓");
+  }
+
+  function handlePhotos(event) {
+    const files = Array.from(event.target.files).slice(0, 2);
+    const preview = document.getElementById("photosPreview");
+    preview.innerHTML = "";
+    uploadedImages = [];
+
+    files.forEach((file, index) => {
+      const reader = new FileReader();
+      reader.onload = e => {
+        uploadedImages.push(e.target.result);
+        const card = document.createElement("div");
+        card.className = "photo-card";
+        card.innerHTML = `<img src="${e.target.result}" alt="صورة ${index + 1}" /><div>صورة الموقع (${index + 1})</div>`;
+        preview.appendChild(card);
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  function getSelectedClauses() {
+    return Array.from(document.querySelectorAll(".clause-cb:checked")).map(cb => cb.value);
+  }
+
+  function exportToWord() {
+    const project = document.getElementById("projectSelect").selectedOptions[0]?.text || "";
+    const worksite = document.getElementById("worksite").value;
+    const issuer = document.getElementById("issuerName").value;
+    const date = document.getElementById("swoDate").value;
+    const time = document.getElementById("swoTime").value;
+    const clauses = getSelectedClauses().map(c => `<li>${c}</li>`).join("");
+    const problem = document.getElementById("problemDesc").value;
+    const action = document.getElementById("correctiveAction").value;
+    const resp = document.getElementById("respName").value;
+
+    const html = `
+      <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+      <head><meta charset='utf-8'><title>Stop Work Order</title></head>
+      <body dir="rtl" style="font-family: Arial, sans-serif;">
+        <h2 style="color:#b91c1c; text-align:center;">نموذج أمر إيقاف عمل (STOP WORK ORDER)</h2>
+        <p style="text-align:center;">شركة مجموعة العمرو للاستشارات الهندسية – وحدة أعمال الباحة</p>
+        <table border="1" cellpadding="8" cellspacing="0" width="100%">
+          <tr><th>المشروع / المقاول</th><td>${project}</td></tr>
+          <tr><th>موقع العمل</th><td>${worksite}</td></tr>
+          <tr><th>مُصدر أمر الإيقاف</th><td>${issuer}</td></tr>
+          <tr><th>التاريخ والوقت</th><td>${date} - ${time}</td></tr>
+          <tr><th>بنود الإيقاف</th><td><ul>${clauses}</ul></td></tr>
+          <tr><th>وصف المشكلة</th><td>${problem}</td></tr>
+          <tr><th>الإجراء التصحيحي</th><td>${action}</td></tr>
+          <tr><th>المسؤول عن الإجراء</th><td>${resp}</td></tr>
+        </table>
+      </body></html>
+    `;
+
+    const blob = new Blob(['\ufeff', html], { type: 'application/msword' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `Stop_Work_Order_${date}.doc`;
+    link.click();
+    showToast("تم تصدير ملف Word ✓");
+  }
+
+  function sendEmail() {
+    const to = document.getElementById("contractorEmail").value;
+    const project = document.getElementById("projectSelect").selectedOptions[0]?.text || "";
+    const worksite = document.getElementById("worksite").value;
+    const date = document.getElementById("swoDate").value;
+    const problem = document.getElementById("problemDesc").value;
+    const subject = encodeURIComponent(`أمر إيقاف عمل فوري (STOP WORK ORDER) - ${project}`);
+    const body = encodeURIComponent(
+      `السلام عليكم ورحمة الله وبركاته،\n\n` +
+      `نحيطكم علماً بصدور أمر إيقاف عمل فوري:\n` +
+      `- المشروع: ${project}\n` +
+      `- موقع العمل: ${worksite}\n` +
+      `- التاريخ: ${date}\n` +
+      `- وصف المخالفة: ${problem}\n\n` +
+      `يرجى إيقاف العمل فوراً وتنفيذ الإجراءات التصحيحية المعتمدة.\n` +
+      `شركة مجموعة العمرو للاستشارات الهندسية – وحدة أعمال الباحة`
+    );
+    window.location.href = `mailto:${to}?subject=${subject}&body=${body}`;
+  }
+
+  function sendWhatsApp() {
+    const project = document.getElementById("projectSelect").selectedOptions[0]?.text || "";
+    const worksite = document.getElementById("worksite").value;
+    const issuer = document.getElementById("issuerName").value;
+    const date = document.getElementById("swoDate").value;
+    const text = encodeURIComponent(
+      `🚨 *أمر إيقاف عمل فوري (STOP WORK ORDER)*\n` +
+      `*المشروع:* ${project}\n` +
+      `*الموقع:* ${worksite}\n` +
+      `*التاريخ:* ${date}\n` +
+      `*مُصدر الأمر:* ${issuer}\n` +
+      `يرجى إيقاف العمل فوراً ومعالجة الملاحظات قبل الاستئناف.`
+    );
+    window.open(`https://wa.me/?text=${text}`, "_blank");
+  }
+
+  function resetForm() {
+    document.getElementById("worksite").value = "";
+    document.getElementById("problemDesc").value = "";
+    document.getElementById("respName").value = "";
+    document.querySelectorAll(".clause-cb").forEach(cb => cb.checked = false);
+    document.getElementById("photosPreview").innerHTML = "";
+    clearSignature();
+    initDateTime();
+    showToast("تم تجهيز نموذج جديد ✓");
+  }
+
+  window.onload = () => {
+    initDateTime();
+    filterProjects();
+    resizeCanvas();
+  };
+  window.onresize = resizeCanvas;
+</script>
+
+</body>
+</html>
