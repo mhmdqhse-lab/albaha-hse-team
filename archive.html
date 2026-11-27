@@ -99,6 +99,20 @@
     StopWorkOrders: "أمر إيقاف عمل"
   };
 
+  function cleanVal(v) {
+    const s = String(v || "").trim();
+    return (s === "-" || s === "—") ? "" : s;
+  }
+
+  function isMeaningfulRecord(r) {
+    const insp = cleanVal(r.inspector);
+    const proj = cleanVal(r.project);
+    const cont = cleanVal(r.contractor);
+    const sum = cleanVal(r.summary);
+    const hasPhotos = Array.isArray(r.photos) && r.photos.length > 0;
+    return Boolean(insp || proj || cont || sum || hasPhotos);
+  }
+
   async function loadRecords() {
     const box = document.getElementById("recordsList");
     box.innerHTML = '<div class="empty-state">جاري جلب السجلات والصور...</div>';
@@ -106,7 +120,7 @@
       const res = await fetch(SCRIPT_URL);
       const data = await res.json();
       if (!data.ok) throw new Error(data.error || "تعذر جلب البيانات");
-      allRecords = data.records || [];
+      allRecords = (data.records || []).filter(isMeaningfulRecord);
       applyLoggedInUserFilter();
       renderFiltered();
     } catch (err) {
@@ -140,20 +154,33 @@
     const box = document.getElementById("recordsList");
 
     const list = allRecords.filter(r => {
-      const mInsp = (insp === "all" || r.inspector === insp);
+      const rInsp = cleanVal(r.inspector);
+      const rProj = cleanVal(r.project);
+      const rCont = cleanVal(r.contractor);
+      const rLoc = cleanVal(r.location);
+      const rSum = cleanVal(r.summary);
+      const mInsp = (insp === "all" || rInsp === insp);
       const mType = (type === "all" || r.reportType === type);
-      const hay = `${r.project} ${r.contractor} ${r.location} ${r.summary}`.toLowerCase();
+      const hay = `${rProj} ${rCont} ${rLoc} ${rSum} ${rInsp}`.toLowerCase();
       const mQ = (!q || hay.includes(q));
       return mInsp && mType && mQ;
     });
 
     if (list.length === 0) {
-      box.innerHTML = '<div class="empty-state">لا توجد تقارير محفوظة مطابقة للتصفية الحالية.</div>';
+      box.innerHTML = '<div class="empty-state">لا توجد تقارير محفوظة حالياً؛ سيبدأ الأرشيف بالظهور تلقائياً عند حفظ أول تقرير من النماذج.</div>';
       return;
     }
 
     box.innerHTML = list.map(r => {
-      const photosHtml = (r.photos || []).map((url, i) =>
+      const rInsp = cleanVal(r.inspector) || "غير محدد";
+      const rProj = cleanVal(r.project) || "غير محدد";
+      const rCont = cleanVal(r.contractor) || "غير محدد";
+      const rLoc = cleanVal(r.location) || "غير محدد";
+      const rDate = cleanVal(r.visitDate);
+      const rSum = cleanVal(r.summary) || "بدون ملخص";
+      const photos = (r.photos || []).map(p => cleanVal(p)).filter(Boolean);
+
+      const photosHtml = photos.map((url, i) =>
         `<a href="${url}" target="_blank" rel="noopener" class="photo-link-btn">🖼️ عرض الصورة (${i + 1}) ↗</a>`
       ).join("");
 
@@ -161,14 +188,14 @@
         <div class="record-card">
           <div class="record-top">
             <span class="badge-type">${typeLabels[r.reportType] || r.reportType}</span>
-            <strong style="font-size:13.5px;color:#0f3d24;">👤 ${r.inspector || "-"} | 📅 ${r.visitDate || ""}</strong>
+            <strong style="font-size:13.5px;color:#0f3d24;">👤 ${rInsp}${rDate ? ` | 📅 ${rDate}` : ""}</strong>
           </div>
           <div class="record-meta">
-            <strong>المقاول:</strong> ${r.contractor || "-"}<br>
-            <strong>المشروع:</strong> ${r.project || "-"}<br>
-            <strong>الموقع:</strong> ${r.location || "-"}
+            <strong>المقاول:</strong> ${rCont}<br>
+            <strong>المشروع:</strong> ${rProj}<br>
+            <strong>الموقع:</strong> ${rLoc}
           </div>
-          <div class="record-summary">${r.summary || "-"}</div>
+          <div class="record-summary">${rSum}</div>
           ${photosHtml ? `<div class="photo-links">${photosHtml}</div>` : `<div style="font-size:12px;color:#64748b;">لا توجد صور مرفقة في هذا التقرير</div>`}
         </div>
       `;
