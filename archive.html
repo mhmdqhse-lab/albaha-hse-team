@@ -91,6 +91,7 @@
 
 <script>
   const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzjjXUcuOl3vjFlHkYCNWNivMwleGF0zXVz4tznVDMU1Vlv5AcBVnRSoDl0C--tRRXh/exec";
+  const ARCHIVE_START_ISO = "2026-11-26T21:00:00.000Z";
   let allRecords = [];
 
   const typeLabels = {
@@ -105,19 +106,23 @@
   }
 
   function isMeaningfulRecord(r) {
+    const id = cleanVal(r.id);
+    const ts = cleanVal(r.timestamp);
     const insp = cleanVal(r.inspector);
     const proj = cleanVal(r.project);
     const cont = cleanVal(r.contractor);
     const sum = cleanVal(r.summary);
     const hasPhotos = Array.isArray(r.photos) && r.photos.length > 0;
-    return Boolean(insp || proj || cont || sum || hasPhotos);
+    const hasContent = Boolean(insp || proj || cont || sum || hasPhotos);
+    const isNew = (!ts || ts >= ARCHIVE_START_ISO) && (!id || id.startsWith("HSE-"));
+    return hasContent && isNew;
   }
 
   async function loadRecords() {
     const box = document.getElementById("recordsList");
     box.innerHTML = '<div class="empty-state">جاري جلب السجلات والصور...</div>';
     try {
-      const res = await fetch(SCRIPT_URL);
+      const res = await fetch(SCRIPT_URL + "?t=" + Date.now());
       const data = await res.json();
       if (!data.ok) throw new Error(data.error || "تعذر جلب البيانات");
       allRecords = (data.records || []).filter(isMeaningfulRecord);
