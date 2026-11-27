@@ -141,6 +141,7 @@
     font-size: 15.5px; font-weight: 700; cursor: pointer; display: flex;
     align-items: center; justify-content: center; gap: 8px; text-decoration: none;
   }
+  .btn-cloud { background: #0f3d24; color: #fff; box-shadow: 0 4px 12px rgba(15, 61, 36, 0.25); }
   .btn-whatsapp { background: #25D366; color: #fff; box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3); }
   .btn-copy { background: var(--primary); color: #fff; }
   body.night-mode .btn-copy { background: #1e293b; }
@@ -163,7 +164,7 @@
 
 <div class="nav-back">
   <a href="index.html">← العودة للبوابة الرئيسية</a>
-  <span style="font-size:12.5px;color:#475569;font-weight:bold;">وحدة أعمال الباحة - HSE</span>
+  <a href="archive.html" style="background:#b68d40;">📂 أرشيف التقارير</a>
 </div>
 
 <div class="header">
@@ -276,6 +277,7 @@
   <div class="preview-box" id="reportOutput"></div>
 
   <div class="btn-group" style="margin-top:14px;">
+    <button type="button" class="action-btn btn-cloud" onclick="saveVisitToCloud(this)">☁️ حفظ الزيارة في السحابة</button>
     <a id="waDirectLink" href="#" class="action-btn btn-whatsapp" onclick="handleWhatsAppClick(event)">📲 إرسال مباشر عبر واتساب</a>
     <button type="button" class="action-btn btn-copy" onclick="copyReport()">📋 نسخ التقرير للحافظة</button>
     <button type="button" class="action-btn btn-reset" onclick="resetForm()">🔄 مسح الاختيارات لتقرير جديد</button>
@@ -285,6 +287,7 @@
 <div id="toast" class="toast">تم نسخ التقرير بنجاح ✓</div>
 
 <script>
+  const CLOUD_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzjjXUcuOl3vjFlHkYCNWNivMwleGF0zXVz4tznVDMU1Vlv5AcBVnRSoDl0C--tRRXh/exec";
   let currentMode = 'day';
 
   const projects = [
@@ -312,7 +315,6 @@
     { id: 21, sector: "السراة", leadEngineer: "م. سراقة بانقا", company: "شركة الخط الذهبي للمقاولات", name: "تنفيذ أعمال إنشاء شبكات المياه بمركز بني كبير بمحافظة بلجرشي - مرحلة أولى", contract: "141240081", location: "الباحة - بلجرشي - بني كبير", inspector: "عبدالله شكاك", contractorHSE: "م. خالد هاشم" }
   ];
 
-  // بنود الزيارة النهارية (56 بنداً من اللائحة كما هي بدون أي تغيير)
   const dayNotes = [
     { code: "بند 1", text: "عدم وجود إدارة للصحة والسلامة لدى المقاول أو عدم توفير مختصي سلامة مؤهلين بالمشروع وبالعدد المناسب حسب تعليمات وزارة الموارد البشرية والتنمية الاجتماعية", fine: "5,000 - 10,000 ريال | مهلة: 30 يوماً" },
     { code: "بند 2", text: "عدم الإبلاغ عن الحوادث أو الإصابات المهنية", fine: "2,000 - 5,000 ريال | فوري" },
@@ -372,16 +374,12 @@
     { code: "بند 56", text: "وجود مخالفات بيئية تتمثل في التلوث البصري، الضوضاء العالية، جودة الهواء", fine: "2,000 - 5,000 ريال | مهلة: 5 أيام" }
   ];
 
-  // بنود الزيارة الليلية (حالات مطابقة إيجابية ✅ + مخالفات وأعطال ليلية 🔴)
   const nightNotes = [
-    // الحالات الإيجابية (تُطبع بعلامة ✅ في التقرير)
     { type: "positive", group: "أولاً: نقاط الالتزام والتجهيزات الليلية المتوفرة (✅)", code: "حالة الموقع", text: "يوجد إضاءة ليلية منتظمة وكافية على امتداد منطقة العمل", fine: "مطابق لاشتراطات الإنارة الليلية" },
     { type: "positive", code: "حالة الموقع", text: "يوجد حارس ليلي متواجد بالموقع لمتابعة السلامة وتأمين الحواجز", fine: "مطابق لاشتراطات الحراسة الليلية" },
     { type: "positive", code: "حالة الموقع", text: "وجود فلاشرات مضيئة وتحذيرية تعمل بكفاءة على الحواجز", fine: "مطابق لدليل التحكم المروري" },
     { type: "positive", code: "حالة الموقع", text: "وجود أسهم مضيئة ولوحات إرشادية عاكسة لتوجيه الحركة المرورية", fine: "مطابق لدليل التحكم المروري" },
     { type: "positive", code: "حالة الموقع", text: "الحواجز الخرسانية (New Jersey) مرصوصة بإحكام ومعزولة بالكامل ليلاً", fine: "مطابق لاشتراطات العزل" },
-
-    // الملاحظات والمخالفات الليلية (تُطبع بعلامة 🔴 في التقرير)
     { type: "negative", group: "ثانياً: الملاحظات والمخالفات المرصودة ليلاً (🔴)", code: "بند 29 - إنارة الحفرية", text: "عدم إنارة الحفرية ليلاً حسب مواصفات اللائحة", fine: "5,000 - 10,000 ريال | مهلة: يوم عمل واحد" },
     { type: "negative", code: "دليل التحكم المروري", text: "عدم توفير إضاءات ومضية وفلاشات دوارة تحذيرية على الحواجز ومنطقة التحويلة", fine: "دليل اشتراطات السلامة - الإنارة الليلية" },
     { type: "negative", code: "دليل الاشتراطات", text: "يوجد أعطال في شريط الإضاءة LED وأجزاء منه لا تعمل", fine: "بند 29 و 47 - صيانة الإنارة الليلية" },
@@ -688,6 +686,64 @@
     t.innerText = msg;
     t.classList.add('show');
     setTimeout(() => t.classList.remove('show'), 2800);
+  }
+
+  function getActiveSessionMember(fallbackName) {
+    try {
+      const u = JSON.parse(localStorage.getItem("hse_current_user") || "null");
+      if (u && u.name) return u.name;
+    } catch (e) {}
+    return fallbackName || "مراقب سلامة";
+  }
+
+  async function saveVisitToCloud(btnEl) {
+    const originalText = btnEl ? btnEl.textContent : "";
+    const val = document.getElementById("projectSelect").value;
+    let company, project, location;
+
+    if (val === "custom") {
+      company = document.getElementById("customCompany").value || "-";
+      project = document.getElementById("customProject").value || "-";
+      location = document.getElementById("customLocation").value || "-";
+    } else {
+      const p = projects.find(item => item.id === parseInt(val));
+      company = p ? p.company : "-";
+      project = p ? p.name : "-";
+      location = p ? p.location : "-";
+    }
+
+    const payload = {
+      reportType: "VisitReports",
+      inspector: getActiveSessionMember(getInspectorName()),
+      project: project,
+      contractor: company,
+      location: location,
+      visitDate: document.getElementById("visitDate").value,
+      summary: buildReportText(),
+      photos: []
+    };
+
+    if (btnEl) {
+      btnEl.disabled = true;
+      btnEl.textContent = "⏳ جاري الحفظ في السحابة...";
+    }
+
+    try {
+      await fetch(CLOUD_SCRIPT_URL, {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify(payload)
+      });
+      showToast("تم حفظ تقرير الزيارة في السحابة بنجاح ✓");
+    } catch (err) {
+      showToast("تعذر الحفظ في السحابة: " + err.message);
+    } finally {
+      if (btnEl) {
+        btnEl.disabled = false;
+        btnEl.textContent = originalText || "☁️ حفظ الزيارة في السحابة";
+      }
+    }
   }
 
   init();
